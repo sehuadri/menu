@@ -21,7 +21,7 @@ count_offline=0
 # Fungsi untuk meminta URL jika file .url belum ada
 request_url() {
     echo "File $URL_FILE tidak ditemukan."
-    echo "Masukkan path URL izin Anda (contoh: myridwan/izinvps/ipx):"
+    echo "Masukkan path URL izin Anda (contoh: akunrepomu/izinvps/ipx):"
     read -rp "Input: " user_repo_path
     echo "https://raw.githubusercontent.com/$user_repo_path" > "$URL_FILE"
     echo "URL telah disimpan di $URL_FILE."
