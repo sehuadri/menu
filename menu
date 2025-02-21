@@ -39,7 +39,7 @@ fi
 function Rename() {
 clear
 echo -e "${YELLOW}----------------------------------------------------------${NC}"
-echo -e "\033[96;1m                      Welcome To Script ADIDASTORE              \033[0m"
+echo -e "\033[96;1m                      Welcome To Script cloudvpn              \033[0m"
 echo -e "${YELLOW}----------------------------------------------------------${NC}"
 echo ""
 sleep 3s
@@ -102,10 +102,10 @@ fi
 ######################################
 # // USERNAME IZIN IPP
 rm -f /usr/bin/user
-username=$(curl -sS https://raw.githubusercontent.com/Adidastore11/izinvps/main/ip | grep -wE $MYIP | awk '{print $2}')
+username=$(curl -sS https://raw.githubusercontent.com/awanklod/izin_new/main/ip | grep -wE $MYIP | awk '{print $2}')
 echo "$username" >/usr/bin/user
 rm -f /usr/bin/e
-valid=$(curl -sS https://raw.githubusercontent.com/Adidastore11/izinvps/main/ip | grep -wE $MYIP | awk '{print $3}')
+valid=$(curl -sS https://raw.githubusercontent.com/awanklod/izin_new/main/ip | grep -wE $MYIP | awk '{print $3}')
 echo "$valid" > /usr/bin/e
 
 clear
@@ -204,8 +204,8 @@ ssx=$(grep -c -E "^#!# " "/etc/xray/config.json")
 let ssa=$ssx/2
 
 # // XWAN TUNNELING | XW PROJECT
-# // WHATSAPP : 087769315398
-# // TELEGRAM : KYTXZ
+# // WHATSAPP : none
+# // TELEGRAM : amiqyu
 
 
 function Xwan_Banner() {
