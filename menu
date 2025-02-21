@@ -62,7 +62,7 @@ echo -e ""
 read -p "   INPUT YOUR NAME :   " host1
 read -p "   INPUT PAS ADMIN :   " host11
 rm /etc/xray/username
-if [[ $host11 == 123@Xwan ]]; then
+if [[ $host11 == CLOUDVPN_PREMIUM ]]; then
 echo $host1 >> /etc/xray/username
 echo ""
 clear
@@ -70,7 +70,7 @@ print_success "Rename Script"
 sleep 3
 menu
 else
-echo "MANDIRI NETWORK" > /etc/xray/username
+echo "CLOUDVPN_PREMIUM" > /etc/xray/username
 clear
 echo -e "${RED} Mohon Maaf Sepertinya Anda Bukan Owner ${NC}"
 sleep 3
@@ -92,7 +92,7 @@ clear
 fi
 elif [[ $host == "2" ]]; then
 rm /etc/xray/username
-echo "XWAN_STORE" > /etc/xray/username
+echo "CLOUDVPN_PREMIUM" > /etc/xray/username
 clear
 print_success "Script Name Default"
 sleep 3
