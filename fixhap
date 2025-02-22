@@ -56,9 +56,7 @@ sleep 1
 clear
 }
 
-
-
-REPO="http://myrid.my.id/os/install/"
+REPO="https://raw.githubusercontent.com/sehuadri/oss/main/install/"
 # fixhap fix Haproxy
 clear
 echo -e "${BlueCyan} ------------------------- ${Xark} "
