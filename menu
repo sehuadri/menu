@@ -207,7 +207,7 @@ echo -e "${BIWhite}│$NC${BIWhite} ❄️ City          ${BIWhite}: ${BIWhite}$
 echo -e "${BIWhite}│$NC${BIWhite} ❄️ IP VPS        ${BIWhite}: ${BIWhite}$IPVPS${NC}"
 echo -e "${BIWhite}│$NC${BIWhite} ❄️ DOMAIN        ${BIWhite}: ${BIWhite}$domain${NC}"
 echo -e "${BIWhite}│$NC${BIWhite} ❄️ NSDomain      ${BIWhite}: ${BIWhite}$ns${NC}"
-echo -e "${BIWhite}└─────────────────────────────────────────────────┘${NC}""
+echo -e "${BIWhite}└─────────────────────────────────────────────────┘${NC}"
 echo -e "${BIWhite}┌─────────────────────────────────────────────────┐${NC}"
 echo -e "${BIWhite} SSHWS: ${BIWhite}$status_ws${NC} ${BIWhite}DROPBEAR: ${BIWhite}$status_dropbear${NC} ${BIWhite}NGINX: ${BIWhite}$status_nginx${NC} ${BIWhite}XRAY: ${BIWhite}$status_xray${NC} ${BIWhite}HAPROXY: ${BIWhite}$status_haproxy${NC}"
 echo -e "${BIWhite}└─────────────────────────────────────────────────┘${NC}"
@@ -254,5 +254,5 @@ case $opt in
 20) clear ; m-setting ;;
 0) clear ; menu ;;
 x) exit ;;
-*) clear ; menu ;;
+*) echo -e "" ; echo "Press any key to back exit" ; sleep 1 ; exit ;;
 esac
