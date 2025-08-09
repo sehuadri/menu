@@ -184,11 +184,49 @@ let ssx=ss/1
 let vmsx=vms/2
 let vlsx=vls/2
 let trjx=trj/2
-ttoday=$(vnstat | grep "today" | awk '{print $8" "$9}')
-tyest=$(vnstat | grep "yesterday" | awk '{print $8" "$9}')
-current_month=$(date +"%Y-%m")
-tmon=$(vnstat -m | grep "$current_month" | awk '{print $8, $9}')
-tyear=$(vnstat | grep -E "estimated" | awk '{print $8" "$9}')
+# Download
+vnstat_profile=$(vnstat | sed -n '3p' | awk '{print $1}' | grep -o '[^:]*')
+vnstat -i ${vnstat_profile} >/root/t1
+bulan=$(date +%b)
+today=$(vnstat -i ${vnstat_profile} | grep today | awk '{print $8}')
+todayd=$(vnstat -i ${vnstat_profile} | grep today | awk '{print $8}')
+today_v=$(vnstat -i ${vnstat_profile} | grep today | awk '{print $9}')
+today_rx=$(vnstat -i ${vnstat_profile} | grep today | awk '{print $2}')
+today_rxv=$(vnstat -i ${vnstat_profile} | grep today | awk '{print $3}')
+today_tx=$(vnstat -i ${vnstat_profile} | grep today | awk '{print $5}')
+today_txv=$(vnstat -i ${vnstat_profile} | grep today | awk '{print $6}')
+if [ "$(grep -wc ${bulan} /root/t1)" != '0' ]; then
+    bulan=$(date +%b)
+    month=$(vnstat -i ${vnstat_profile} | grep "$bulan " | awk '{print $9}')
+    month_v=$(vnstat -i ${vnstat_profile} | grep "$bulan " | awk '{print $10}')
+    month_rx=$(vnstat -i ${vnstat_profile} | grep "$bulan " | awk '{print $3}')
+    month_rxv=$(vnstat -i ${vnstat_profile} | grep "$bulan " | awk '{print $4}')
+    month_tx=$(vnstat -i ${vnstat_profile} | grep "$bulan " | awk '{print $6}')
+    month_txv=$(vnstat -i ${vnstat_profile} | grep "$bulan " | awk '{print $7}')
+else
+    bulan=$(date +%Y-%m)
+    month=$(vnstat -i ${vnstat_profile} | grep "$bulan " | awk '{print $8}')
+    month_v=$(vnstat -i ${vnstat_profile} | grep "$bulan " | awk '{print $9}')
+    month_rx=$(vnstat -i ${vnstat_profile} | grep "$bulan " | awk '{print $2}')
+    month_rxv=$(vnstat -i ${vnstat_profile} | grep "$bulan " | awk '{print $3}')
+    month_tx=$(vnstat -i ${vnstat_profile} | grep "$bulan " | awk '{print $5}')
+    month_txv=$(vnstat -i ${vnstat_profile} | grep "$bulan " | awk '{print $6}')
+fi
+if [ "$(grep -wc yesterday /root/t1)" != '0' ]; then
+    yesterday=$(vnstat -i ${vnstat_profile} | grep yesterday | awk '{print $8}')
+    yesterday_v=$(vnstat -i ${vnstat_profile} | grep yesterday | awk '{print $9}')
+    yesterday_rx=$(vnstat -i ${vnstat_profile} | grep yesterday | awk '{print $2}')
+    yesterday_rxv=$(vnstat -i ${vnstat_profile} | grep yesterday | awk '{print $3}')
+    yesterday_tx=$(vnstat -i ${vnstat_profile} | grep yesterday | awk '{print $5}')
+    yesterday_txv=$(vnstat -i ${vnstat_profile} | grep yesterday | awk '{print $6}')
+else
+    yesterday=NULL
+    yesterday_v=NULL
+    yesterday_rx=NULL
+    yesterday_rxv=NULL
+    yesterday_tx=NULL
+    yesterday_txv=NULL
+fi
 PERMISSION
 clear
 calculate_cpu_load
@@ -209,7 +247,7 @@ echo -e "${BIWhite}│$NC${BIWhite} ❄️ DOMAIN        ${BIWhite}: ${BIWhite}$
 echo -e "${BIWhite}│$NC${BIWhite} ❄️ NSDomain      ${BIWhite}: ${BIWhite}$ns${NC}"
 echo -e "${BIWhite}└─────────────────────────────────────────────────┘${NC}"
 echo -e "${BIWhite}┌─────────────────────────────────────────────────┐${NC}"
-echo -e "${BIWhite} SSHWS: ${BIWhite}$status_ws${NC} ${BIWhite}DROPBEAR: ${BIWhite}$status_dropbear${NC} ${BIWhite}NGINX: ${BIWhite}$status_nginx${NC} ${BIWhite}XRAY: ${BIWhite}$status_xray${NC} ${BIWhite}HAPROXY: ${BIWhite}$status_haproxy${NC}"
+echo -e "${BIWhite} SSHWS:${BIWhite}$status_ws${NC} ${BIWhite}DROPBEAR:${BIWhite}$status_dropbear${NC} ${BIWhite}NGINX:${BIWhite}$status_nginx${NC} ${BIWhite}XRAY:${BIWhite}$status_xray${NC} ${BIWhite}HAPROXY:${BIWhite}$status_haproxy${NC}"
 echo -e "${BIWhite}└─────────────────────────────────────────────────┘${NC}"
 #echo -e "${BIWhite} SSH : ${NC}${BIYellow}$ess${NC} ${BIWhite}VMESS : ${NC}${BIYellow}$vmsx${NC} ${BIWhite}VLESS : ${NC}${BIYellow}$vlsx${NC} ${BIWhite}TROJAN : ${NC}${BIYellow}$trjx${NC} ${BIWhite}SHADOWSOCKS: ${NC}${BIYellow}$ssx${NC}"
 echo -e "${BIWhite}┌─────────────────────────────────────────────────┐${NC}"
@@ -224,11 +262,16 @@ echo -e "  ${BIWhite}[${BIWhite}08${BIWhite}]${NC} ${BIWhite}• ${BIWhite}Trial
 echo -e "  ${BIWhite}[${BIWhite}09${BIWhite}]${NC} ${BIWhite}• ${BIWhite}Domain   ${BIWhite}[${BIWhite}${status_xray}${BIWhite}]   ${BIWhite}[${BIWhite}19${BIWhite}]${NC} ${BIWhite}• ${BIWhite}Update    ${BIWhite}[${BIWhite}Menu${BIWhite}]  ${BIWhite} $NC"
 echo -e "  ${BIWhite}[${BIWhite}10${BIWhite}]${NC} ${BIWhite}• ${BIWhite}fixx of  ${BIWhite}[${BIWhite}${status_xray}${BIWhite}]   ${BIWhite}[${BIWhite}20${BIWhite}]${NC} ${BIWhite}• ${BIWhite}other     ${BIWhite}[${BIWhite}Menu${BIWhite}]  ${BIWhite} $NC"
 echo -e "${BIWhite}└─────────────────────────────────────────────────┘${NC}"
-echo -e "${BIWhite} Today:${NC} ${BIYellow}$ttoday${NC} ${BIWhite}Yesterday:${NC} ${BIYellow}$tyest${NC} ${BIWhite}Month:${NC} ${BIYellow}$tmon${NC}"
-echo -e "${BIWhite} ──────────────────────────────────────────────────────${NC}"
+echo -e "$BIWhite┌─────────────────────────────────────────────────┐${NC}"
+echo -e "$BIWhite ${BIWhite}Traffic${NC}      ${BIWhite}Today       Yesterday       Month   ${NC}"
+echo -e "$BIWhite ${BIYellow}Download${NC}   ${BIYellow}$today_tx $today_txv     $yesterday_tx $yesterday_txv    $month_tx $month_txv   ${NC}"
+echo -e "$BIWhite ${BIYellow}Upload${NC}     ${BIYellow}$today_rx $today_rxv     $yesterday_rx $yesterday_rxv    $month_rx $month_rxv   ${NC}"
+echo -e "$BIWhite ${BIWhite}Total${NC}    ${BIWhite}  $todayd $today_v     $yesterday $yesterday_v    $month $month_v  ${NC} "
+echo -e "$BIWhite└─────────────────────────────────────────────────┘${NC}"
+echo -e "$BIWhite┌─────────────────────────────────────────────────┐${NC}"
 echo -e "${BIWhite} Username :${NC} ${BIYellow}$username${NC}"
 echo -e "${BIWhite} Exp Date :${NC} $EXPIRE_INFO"
-echo -e "${BIWhite} ──────────────────────────────────────────────────────${NC}"
+echo -e "$BIWhite└─────────────────────────────────────────────────┘${NC}"
 read -p " Select menu : " opt
 echo -e ""
 case $opt in
