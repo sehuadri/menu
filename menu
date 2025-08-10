@@ -263,15 +263,16 @@ echo -e "  ${BIWhite}[${BIWhite}09${BIWhite}]${NC} ${BIWhite}• ${BIWhite}Domai
 echo -e "  ${BIWhite}[${BIWhite}10${BIWhite}]${NC} ${BIWhite}• ${BIWhite}fixx of  ${BIWhite}[${BIWhite}${status_xray}${BIWhite}]   ${BIWhite}[${BIWhite}20${BIWhite}]${NC} ${BIWhite}• ${BIWhite}other     ${BIWhite}[${BIWhite}Menu${BIWhite}]  ${BIWhite} $NC"
 echo -e "${BIWhite}└─────────────────────────────────────────────────┘${NC}"
 echo -e "$BIWhite┌─────────────────────────────────────────────────┐${NC}"
+echo -e "${BIWhite} ORDER NAME :${NC} ${BIYellow}$username${NC}"
+echo -e "${BIWhite} Exp SCRIPT :${NC} $EXPIRE_INFO"
+echo -e "$BIWhite└─────────────────────────────────────────────────┘${NC}"
+echo -e "$BIWhite┌─────────────────────────────────────────────────┐${NC}"
 echo -e "$BIWhite ${BIWhite}Traffic${NC}      ${BIWhite}Today       Yesterday       Month   ${NC}"
 echo -e "$BIWhite ${BIYellow}Download${NC}   ${BIYellow}$today_tx $today_txv     $yesterday_tx $yesterday_txv    $month_tx $month_txv   ${NC}"
 echo -e "$BIWhite ${BIYellow}Upload${NC}     ${BIYellow}$today_rx $today_rxv     $yesterday_rx $yesterday_rxv    $month_rx $month_rxv   ${NC}"
 echo -e "$BIWhite ${BIWhite}Total${NC}    ${BIWhite}  $todayd $today_v     $yesterday $yesterday_v    $month $month_v  ${NC} "
 echo -e "$BIWhite└─────────────────────────────────────────────────┘${NC}"
-echo -e "$BIWhite┌─────────────────────────────────────────────────┐${NC}"
-echo -e "${BIWhite} Username :${NC} ${BIYellow}$username${NC}"
-echo -e "${BIWhite} Exp Date :${NC} $EXPIRE_INFO"
-echo -e "$BIWhite└─────────────────────────────────────────────────┘${NC}"
+
 read -p " Select menu : " opt
 echo -e ""
 case $opt in
