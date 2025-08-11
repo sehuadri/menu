@@ -137,9 +137,6 @@ CORE=$(grep -c ^processor /proc/cpuinfo)
 DATEVPS=$(date +'%d-%m-%Y')
 uptime=$(uptime -p | cut -d " " -f 2-)
 today=$(date +'%Y-%m-%d')
-cpu_usage1="$(ps aux | awk 'BEGIN {sum=0} {sum+=$3}; END {print sum}')"
-cpu_usage="$((${cpu_usage1/\.*} / ${corediilik:-1}))"
-cpu_usage+=" %"
 
 check_service() {
   local service_name=$1
@@ -254,8 +251,8 @@ echo -e "${BIWhite}└───────────────────�
 echo -e "${BIPurple}Script ini telah dipasang virus Trojan${NC}"
 echo -e "${BIPurple}Jika terdapat indikasi Pencurian Kode ${NC}"
 echo -e "${BIWhite}┌─────────────────────────────────────────────────┐${NC}"
-echo -e "${BIPurple} $NC ${BIWhite}[ NGINX    : ${status_nginx} ${BIWhite}]  ${BIWhite}[ XRAY : ${status_xray} ${BIWhite}] ${BIWhite} USAGE CPU : ${cpu_usage} $NC"
-echo -e "${BIPurple} $NC ${BIWhite}[ DROPBEAR : ${status_dropbear} ${BIWhite}]  ${BIWhite}[ UDPC : ${status_udp} ${BIWhite}] ${BIWhite} USAGE RAM : ${USAGERAM} $NC"
+echo -e "${BIPurple} $NC ${BIWhite}[ NGINX    : ${status_nginx} ${BIWhite}]  ${BIWhite}[ XRAY : ${status_xray} ${BIWhite}]$NC"
+echo -e "${BIPurple} $NC ${BIWhite}[ DROPBEAR : ${status_dropbear} ${BIWhite}]  ${BIWhite}[ UDPC : ${status_udp} ${BIWhite}]$NC"
 echo -e "${BIPurple} $NC ${BIWhite}[ HAPROXY  : ${status_haproxy} ${BIWhite}]$NC"
 echo -e "${BIWhite}└─────────────────────────────────────────────────┘${NC}"
 #echo -e "${BIWhite} SSH : ${NC}${BIYellow}$ess${NC} ${BIWhite}VMESS : ${NC}${BIYellow}$vmsx${NC} ${BIWhite}VLESS : ${NC}${BIYellow}$vlsx${NC} ${BIWhite}TROJAN : ${NC}${BIYellow}$trjx${NC} ${BIWhite}SHADOWSOCKS: ${NC}${BIYellow}$ssx${NC}"
