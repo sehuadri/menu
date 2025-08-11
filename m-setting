@@ -114,8 +114,8 @@ case $opt in
 10) clear ; m-trial ;;
 11) clear ; fix-nginx ;;
 12) clear ; bw ;;
-13) clear ; m-rebuild ;;
-14) clear ; m-rebuild ;;
+13) clear ; m-dropbear ; read -n 1 -s -r -p "Press [ Enter ] to back on menu" ; menu ;;
+14) clear ; m-domain ;;
 0) clear ; menu ; exit ;;
 x) menu ;;
 *) echo "anda salah tekan" ; sleep 1 ; m-setting ;;
