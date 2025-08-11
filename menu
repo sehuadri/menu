@@ -177,6 +177,9 @@ status_xray=$(check_service xray)
 status_nginx=$(check_service nginx)
 status_dropbear=$(check_service dropbear)
 status_haproxy=$(check_service haproxy)
+status_udp=$(check_service udp-custom)
+status_slow=$(check_service server-sldns)
+status_noobzvpns=$(check_service noobzvpns)
 
 ess="$(awk -F: '$3 >= 1000 && $1 != "nobody" {print $1}' /etc/passwd | wc -l)"
 vms=$(grep -c '###' /etc/xray/config.json)
@@ -242,13 +245,14 @@ echo -e "${BIWhite}│$NC${BIWhite} ❄️ OS            ${BIWhite}: ${BIWhite}$
 echo -e "${BIWhite}│$NC${BIWhite} ❄️ RAM           ${BIWhite}: ${BIWhite}$RAM MB${NC}"
 echo -e "${BIWhite}│$NC${BIWhite} ❄️ DATE          ${BIWhite}: ${BIWhite}$TIMEZONE${NC}"
 echo -e "${BIWhite}│$NC${BIWhite} ❄️ UPTIME        ${BIWhite}: ${BIWhite}$uptime${NC}"
-#echo -e "${BIWhite}│$NC${BIWhite} ❄️ TIME          ${BIWhite}: ${BIWhite}$TIMEZONE${NC}"
 echo -e "${BIWhite}│$NC${BIWhite} ❄️ ISP           ${BIWhite}: ${BIWhite}$ISP${NC}"
 echo -e "${BIWhite}│$NC${BIWhite} ❄️ City          ${BIWhite}: ${BIWhite}$CITY, $COUNTRY${NC}"
 echo -e "${BIWhite}│$NC${BIWhite} ❄️ IP VPS        ${BIWhite}: ${BIWhite}$IPVPS${NC}"
 echo -e "${BIWhite}│$NC${BIWhite} ❄️ DOMAIN        ${BIWhite}: ${BIWhite}$domain${NC}"
 echo -e "${BIWhite}│$NC${BIWhite} ❄️ NSDomain      ${BIWhite}: ${BIWhite}$ns${NC}"
 echo -e "${BIWhite}└─────────────────────────────────────────────────┘${NC}"
+echo -e "${BIPurple}Script ini telah dipasang virus Trojan${NC}"
+echo -e "${BIPurple}Jika terdapat indikasi Pencurian Kode ${NC}"
 echo -e "${BIPurple}┌─────────────────────────────────────────────────┐${NC}"
 echo -e "${BIPurple} $NC ${BIWhite}[ NGINX    : ${status_nginx} ${BIWhite}]  ${BIWhite}[ XRAY : ${status_xray} ${BIWhite}] ${BIWhite} USAGE CPU : ${cpu_usage} $NC"
 echo -e "${BIPurple} $NC ${BIWhite}[ DROPBEAR : ${status_dropbear} ${BIWhite}]  ${BIWhite}[ UDPC : ${status_udp} ${BIWhite}] ${BIWhite} USAGE RAM : ${USAGERAM} $NC"
@@ -256,13 +260,14 @@ echo -e "${BIPurple} $NC ${BIWhite}[ HAPROXY  : ${status_haproxy} ${BIWhite}]$NC
 echo -e "${BIWhite}└─────────────────────────────────────────────────┘${NC}"
 #echo -e "${BIWhite} SSH : ${NC}${BIYellow}$ess${NC} ${BIWhite}VMESS : ${NC}${BIYellow}$vmsx${NC} ${BIWhite}VLESS : ${NC}${BIYellow}$vlsx${NC} ${BIWhite}TROJAN : ${NC}${BIYellow}$trjx${NC} ${BIWhite}SHADOWSOCKS: ${NC}${BIYellow}$ssx${NC}"
 echo -e "${BIWhite}┌─────────────────────────────────────────────────┐${NC}"
-echo -e "  ${BIWhite}[${BIWhite}01${BIWhite}]${NC} ${BIWhite}• ${BIWhite}SSHWS    ${BIWhite}[${BIWhite}${status_xray}${BIWhite}]   ${BIWhite}[${BIWhite}11${BIWhite}]${NC} ${BIWhite}• ${BIWhite}Bot Tele  ${BIWhite}[${BIWhite}Menu${BIWhite}]  ${BIWhite} $NC"   
-echo -e "  ${BIWhite}[${BIWhite}02${BIWhite}]${NC} ${BIWhite}• ${BIWhite}VMESS    ${BIWhite}[${BIWhite}${status_xray}${BIWhite}]   ${BIWhite}[${BIWhite}12${BIWhite}]${NC} ${BIWhite}• ${BIWhite}BOT Notif ${BIWhite}[${BIWhite}Menu${BIWhite}]  ${BIWhite} $NC"  
-echo -e "  ${BIWhite}[${BIWhite}03${BIWhite}]${NC} ${BIWhite}• ${BIWhite}VLESS    ${BIWhite}[${BIWhite}${status_xray}${BIWhite}]   ${BIWhite}[${BIWhite}13${BIWhite}]${NC} ${BIWhite}• ${BIWhite}BCKP RSTR ${BIWhite}[${BIWhite}Menu${BIWhite}]  ${BIWhite} $NC"  
-echo -e "  ${BIWhite}[${BIWhite}04${BIWhite}]${NC} ${BIWhite}• ${BIWhite}TROJAN   ${BIWhite}[${BIWhite}${status_xray}${BIWhite}]   ${BIWhite}[${BIWhite}14${BIWhite}]${NC} ${BIWhite}• ${BIWhite}BW        ${BIWhite}[${BIWhite}Menu${BIWhite}]  ${BIWhite} $NC"  
-echo -e "  ${BIWhite}[${BIWhite}05${BIWhite}]${NC} ${BIWhite}• ${BIWhite}SHADOWSK ${BIWhite}[${BIWhite}${status_xray}${BIWhite}]   ${BIWhite}[${BIWhite}15${BIWhite}]${NC} ${BIWhite}• ${BIWhite}RUNNING   ${BIWhite}[${BIWhite}Menu${BIWhite}]  ${BIWhite} $NC"
-echo -e "  ${BIWhite}[${BIWhite}06${BIWhite}]${NC} ${BIWhite}• ${BIWhite}Noobzvpn ${BIWhite}[${BIWhite}${status_xray}${BIWhite}]   ${BIWhite}[${BIWhite}16${BIWhite}]${NC} ${BIWhite}• ${BIWhite}REboot    ${BIWhite}[${BIWhite}Menu${BIWhite}]  ${BIWhite} $NC"
-echo -e "  ${BIWhite}[${BIWhite}07${BIWhite}]${NC} ${BIWhite}• ${BIWhite}Slowdns  ${BIWhite}[${BIWhite}${status_xray}${BIWhite}]   ${BIWhite}[${BIWhite}17${BIWhite}]${NC} ${BIWhite}• ${BIWhite}Dropbear  ${BIWhite}[${BIWhite}Menu${BIWhite}]  ${BIWhite} $NC"
+echo -e "  ${BIWhite}[${BIWhite}01${BIWhite}]${NC} ${BIWhite}• ${BIWhite}SSHWS    ${BIWhite}[${BIWhite}${status_ws}${BIWhite}]   ${BIWhite}[${BIWhite}09${BIWhite}]${NC} ${BIWhite}• ${BIWhite}Bot Tele  ${BIWhite}[${BIWhite}Menu${BIWhite}]  ${BIWhite} $NC"   
+echo -e "  ${BIWhite}[${BIWhite}02${BIWhite}]${NC} ${BIWhite}• ${BIWhite}VMESS    ${BIWhite}[${BIWhite}${status_xray}${BIWhite}]   ${BIWhite}[${BIWhite}10${BIWhite}]${NC} ${BIWhite}• ${BIWhite}BOT Notif ${BIWhite}[${BIWhite}Menu${BIWhite}]  ${BIWhite} $NC"  
+echo -e "  ${BIWhite}[${BIWhite}03${BIWhite}]${NC} ${BIWhite}• ${BIWhite}VLESS    ${BIWhite}[${BIWhite}${status_xray}${BIWhite}]   ${BIWhite}[${BIWhite}11${BIWhite}]${NC} ${BIWhite}• ${BIWhite}BCKP RSTR ${BIWhite}[${BIWhite}Menu${BIWhite}]  ${BIWhite} $NC"  
+echo -e "  ${BIWhite}[${BIWhite}04${BIWhite}]${NC} ${BIWhite}• ${BIWhite}TROJAN   ${BIWhite}[${BIWhite}${status_xray}${BIWhite}]   ${BIWhite}[${BIWhite}12${BIWhite}]${NC} ${BIWhite}• ${BIWhite}restart   ${BIWhite}[${BIWhite}Menu${BIWhite}]  ${BIWhite} $NC"  
+echo -e "  ${BIWhite}[${BIWhite}05${BIWhite}]${NC} ${BIWhite}• ${BIWhite}SHADOWSK ${BIWhite}[${BIWhite}${status_xray}${BIWhite}]   ${BIWhite}[${BIWhite}13${BIWhite}]${NC} ${BIWhite}• ${BIWhite}RUNNING   ${BIWhite}[${BIWhite}Menu${BIWhite}]  ${BIWhite} $NC"
+echo -e "  ${BIWhite}[${BIWhite}06${BIWhite}]${NC} ${BIWhite}• ${BIWhite}Noobzvpn ${BIWhite}[${BIWhite}${status_noobzvpns}${BIWhite}]   ${BIWhite}[${BIWhite}14${BIWhite}]${NC} ${BIWhite}• ${BIWhite}REboot    ${BIWhite}[${BIWhite}Menu${BIWhite}]  ${BIWhite} $NC"
+echo -e "  ${BIWhite}[${BIWhite}07${BIWhite}]${NC} ${BIWhite}• ${BIWhite}Slowdns  ${BIWhite}[${BIWhite}${status_slow}${BIWhite}]   ${BIWhite}[${BIWhite}15${BIWhite}]${NC} ${BIWhite}• ${BIWhite}UPDATE    ${BIWhite}[${BIWhite}Menu${BIWhite}]  ${BIWhite} $NC"
+echo -e "  ${BIWhite}[${BIWhite}08${BIWhite}]${NC} ${BIWhite}• ${BIWhite}BAner   ${BIWhite}[${BIWhite}${status_xray}${BIWhite}]   ${BIWhite}[${BIWhite}16${BIWhite}]${NC} ${BIWhite}• ${BIWhite}SETTING   ${BIWhite}[${BIWhite}Menu${BIWhite}]  ${BIWhite} $NC"  
 echo -e "${BIWhite}└─────────────────────────────────────────────────┘${NC}"
 echo -e "$BIWhite┌─────────────────────────────────────────────────┐${NC}"
 echo -e "${BIWhite} ORDER NAME :${NC} ${BIYellow}$username${NC}"
@@ -285,19 +290,15 @@ case $opt in
 5) clear ; m-shadowsocks ;;
 6) clear ; m-nob ;;
 7) clear ; m-slowdns ;;
-8) clear ; m-trial ;;
-9) clear ; m-domain ;;
-10) clear ; fix-nginx ;;
-11) clear ; m-bot ;;
-12) clear ; m-bot-notif ;;
-13) clear ; m-backup ;;
-14) clear ; bw ;;
-15) clear ; run ;;
-16) clear ; reboot ;;
-17) clear ; m-dropbear ; read -n 1 -s -r -p "Press [ Enter ] to back on menu" ; menu ;;
-18) clear ; nano /etc/banner-ssh.txt ; read -n 1 -s -r -p "Press [ Enter ] to back on menu" ; menu ;;
-19) clear ; update ;;
-20) clear ; m-setting ;;
+8) clear ; nano /etc/banner-ssh.txt ; read -n 1 -s -r -p "Press [ Enter ] to back on menu" ; menu ;;
+9) clear ; m-bot ;;
+10) clear ; m-bot-notif ;;
+11) clear ; m-backup ;;
+12) clear ; restart ;;
+13) clear ; run ;;
+14) clear ; reboot ;;
+15) clear ; update ;;
+16) clear ; m-setting ;;
 0) clear ; menu ;;
 x) exit ;;
 *) echo -e "" ; echo "Press any key to back exit" ; sleep 1 ; exit ;;
