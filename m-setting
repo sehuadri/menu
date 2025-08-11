@@ -86,18 +86,14 @@ echo -e "${bgmagenta}┌──────────────────�
 echo -e "${bgmagenta}  $NC$COLBG1               ${BICyan}• VPS SETTING •                 ${bgmagenta}  $NC"
 echo -e "${bgmagenta}└─────────────────────────────────────────────────┘${NC}"
 echo -e " ${bgmagenta}┌─────────────────────────────────────────────────┐${NC}"
-echo -e " ${bgmagenta} $NC${BICyan}[${bgmagenta}01${BICyan}]${NC} ${bgmagenta}• ${BICyan}CHANGE DOMAIN     ${BICyan}[${bgmagenta}09${BICyan}]${NC} ${bgmagenta}• ${BICyan}CHANGE BANNER"
-echo -e " ${bgmagenta} $NC${BICyan}[${bgmagenta}02${BICyan}]${NC} ${bgmagenta}• ${BICyan}SPEEDTEST         ${BICyan}[${bgmagenta}10${BICyan}]${NC} ${bgmagenta}• ${BICyan}INSTALL ADBLOCK"
-echo -e " ${bgmagenta} $NC${BICyan}[${bgmagenta}03${BICyan}]${NC} ${bgmagenta}• ${BICyan}AUTO REBOOT       ${BICyan}[${bgmagenta}11${BICyan}]${NC} ${bgmagenta}• ${BICyan}CHANGE  BOT INFO"
-echo -e " ${bgmagenta} $NC${BICyan}[${bgmagenta}04${BICyan}]${NC} ${bgmagenta}• ${BICyan}CHECK BANDWITH    ${BICyan}[${bgmagenta}12${BICyan}]${NC} ${bgmagenta}• ${BICyan}FIX NGINX OFF"
-echo -e " ${bgmagenta} $NC${BICyan}[${bgmagenta}05${BICyan}]${NC} ${bgmagenta}• ${BICyan}INSTALL WEBMIN    ${BICyan}[${bgmagenta}13${BICyan}]${NC} ${bgmagenta}• ${BICyan}CEK PERFORMA VPS"
-echo -e " ${bgmagenta} $NC${BICyan}[${bgmagenta}06${BICyan}]${NC} ${bgmagenta}• ${BICyan}INSTALL TCP BBR   ${BICyan}[${bgmagenta}14${BICyan}]${NC} ${bgmagenta}• ${BICyan}CHANGE CORE MENU"
-echo -e " ${bgmagenta} $NC${BICyan}[${bgmagenta}07${BICyan}]${NC} ${bgmagenta}• ${BICyan}GANTI TEMA WARNA  ${BICyan}[${bgmagenta}15${BICyan}]${NC} ${bgmagenta}• ${BICyan}BOT DO MENU"
-echo -e " ${bgmagenta} $NC${BICyan}[${bgmagenta}08${BICyan}]${NC} ${bgmagenta}• ${BICyan}LIMIT SPEED       ${BICyan}[${bgmagenta}16${BICyan}]${NC} ${bgmagenta}• ${BICyan}GANTI NAMA CLIENT"
-echo -e " ${bgmagenta} $NC${BICyan}[${bgmagenta}17${BICyan}]${NC} ${bgmagenta}• ${BICyan}BENCHMARK         ${BICyan}[${bgmagenta}99${BICyan}]${NC} ${bgmagenta}• ${BICyan}CLEAR RAM CACHE"
-echo -e " ${bgmagenta} $NC${BICyan}[${bgmagenta}07${BICyan}]${NC} ${bgmagenta}• ${BICyan}GANTI TEMA WARNA  ${BICyan}[${bgmagenta}15${BICyan}]${NC} ${bgmagenta}• ${BICyan}BOT DO MENU"
-echo -e " ${bgmagenta} $NC${BICyan}[${bgmagenta}08${BICyan}]${NC} ${bgmagenta}• ${BICyan}LIMIT SPEED       ${BICyan}[${bgmagenta}16${BICyan}]${NC} ${bgmagenta}• ${BICyan}GANTI NAMA CLIENT"
-echo -e " ${bgmagenta} $NC${BICyan}[${bgmagenta}17${BICyan}]${NC} ${bgmagenta}• ${BICyan}BENCHMARK         ${BICyan}[${bgmagenta}99${BICyan}]${NC} ${bgmagenta}• ${BICyan}CLEAR RAM CACHE"
+echo -e " ${bgmagenta} $NC${BICyan}[${bgmagenta}01${BICyan}]${NC} ${bgmagenta}• ${BICyan}Ganti UUID Xray   ${BICyan}[${bgmagenta}09${BICyan}]${NC} ${bgmagenta}• ${BICyan}Info Port"
+echo -e " ${bgmagenta} $NC${BICyan}[${bgmagenta}02${BICyan}]${NC} ${bgmagenta}• ${BICyan}Install UDP       ${BICyan}[${bgmagenta}10${BICyan}]${NC} ${bgmagenta}• ${BICyan}Rebuild VPS"
+echo -e " ${bgmagenta} $NC${BICyan}[${bgmagenta}03${BICyan}]${NC} ${bgmagenta}• ${BICyan}setupreboot       ${BICyan}[${bgmagenta}11${BICyan}]${NC} ${bgmagenta}• ${BICyan}Trial Xray"
+echo -e " ${bgmagenta} $NC${BICyan}[${bgmagenta}04${BICyan}]${NC} ${bgmagenta}• ${BICyan}CHECK BANDWITH    ${BICyan}[${bgmagenta}12${BICyan}]${NC} ${bgmagenta}• ${BICyan}Change Domain"
+echo -e " ${bgmagenta} $NC${BICyan}[${bgmagenta}05${BICyan}]${NC} ${bgmagenta}• ${BICyan}Autoreboot        ${BICyan}[${bgmagenta}13${BICyan}]${NC} ${bgmagenta}• ${BICyan}fix-nginx"
+echo -e " ${bgmagenta} $NC${BICyan}[${bgmagenta}06${BICyan}]${NC} ${bgmagenta}• ${BICyan}speedtest         ${BICyan}[${bgmagenta}14${BICyan}]${NC} ${bgmagenta}• ${BICyan}BW"
+echo -e " ${bgmagenta} $NC${BICyan}[${bgmagenta}07${BICyan}]${NC} ${bgmagenta}• ${BICyan}Service Mulog IP  ${BICyan}[${bgmagenta}15${BICyan}]${NC} ${bgmagenta}• ${BICyan}Change DROPBEAR"
+echo -e " ${bgmagenta} $NC${BICyan}[${bgmagenta}08${BICyan}]${NC} ${bgmagenta}• ${BICyan}Check Ram & CPU   ${BICyan}[${bgmagenta}16${BICyan}]${NC} ${bgmagenta}• ${BICyan}GANTI NAMA CLIENT"
 echo -e " ${bgmagenta}└─────────────────────────────────────────────────┘${NC}"
 echo -e " ${bgmagenta}┌─────────────────────────────────────────────────┐${NC}"
 echo -e "${BIYellow}Input x or [ Ctrl+C ] • To-${BIWhite}Exit${NC}"
@@ -106,7 +102,6 @@ echo ""
 read -p "Select menu :" opt
 echo -e ""
 case $opt in
-1) clear ; restart ;;
 2) clear ; ganti-id ;;
 3) clear ; install-udp ; read -p "Press enter Back To Menu" ; m-setting ;;
 4) clear ; setupreboot ;;
