@@ -1,76 +1,106 @@
 #!/bin/bash
-clear
-# Warna
-RED='\033[0;31m'
-NC='\033[0m'
-CYAN='\033[0;36m'
+# Skrip untuk menampilkan pengguna yang sedang login melalui SSH (Dropbear & OpenSSH) dan OpenVPN.
 
-# Tentukan sumber log
+# --- Definisi Warna ---
+RED='\033[0;31m'
+GREEN='\033[0;32m'
+ORANGE='\033[0;33m'
+BLUE='\033[0;34m'
+PURPLE='\033[0;35m'
+CYAN='\033[1;36m' # Dibuat tebal agar cocok dengan aslinya
+NC='\033[0m'     # No Color
+
+clear
+
+# --- Menentukan Lokasi Log ---
+# Menggunakan if-elif-else agar lebih efisien dan logis.
 if [ -e "/var/log/auth.log" ]; then
-    LOG="/var/log/auth.log"
+    LOG_FILE="/var/log/auth.log"
 elif [ -e "/var/log/secure" ]; then
-    LOG="/var/log/secure"
+    LOG_FILE="/var/log/secure"
 else
-    journalctl -u dropbear -u ssh --no-pager > /tmp/auth.log
-    LOG="/tmp/auth.log"
+    echo -e "${RED}Error: File log otentikasi (auth.log atau secure) tidak ditemukan.${NC}"
+    exit 1
 fi
 
+# --- Menampilkan Pengguna Dropbear ---
 echo -e "${CYAN}---------------------------------------------${NC}"
-echo "       ID     |  Username    |  IP Address"
+echo -e "       ${ORANGE}DROPBEAR LOGIN${NC}"
+echo -e "${CYAN}---------------------------------------------${NC}"
+printf "%-10s | %-15s | %-15s\n" "ID" "Username" "IP Address"
 echo -e "${CYAN}---------------------------------------------${NC}"
 
-# === DROPBEAR ===
-data=( $(ps -eo pid,comm | grep dropbear | grep -v grep | awk '{print $1}') )
-grep -i "Password auth succeeded" "$LOG" > /tmp/login-db.txt
-
-for PID in "${data[@]}"; do
-    grep "dropbear\[$PID\]" /tmp/login-db.txt > /tmp/login-db-pid.txt
-    if [ -s /tmp/login-db-pid.txt ]; then
-        USER=$(awk '{print $(NF-5)}' /tmp/login-db-pid.txt)
-        IP=$(awk '{print $(NF-3)}' /tmp/login-db-pid.txt)
-        echo "$PID - $USER - $IP"
+# Menggunakan pgrep yang lebih andal untuk mendapatkan PID
+# dan memproses log hanya sekali untuk efisiensi.
+log_content_db=$(grep -i "dropbear.*Password auth succeeded" "$LOG_FILE")
+for pid in $(pgrep -i dropbear); do
+    # Mencari baris log yang sesuai dengan PID yang masih aktif
+    line=$(echo "$log_content_db" | grep "dropbear\[$pid\]")
+    if [ -n "$line" ]; then
+        user=$(echo "$line" | awk '{print $10}')
+        ip=$(echo "$line" | awk '{print $12}')
+        # Menggunakan printf untuk format kolom yang rapi
+        printf "%-10s | %-15s | %-15s\n" "$pid" "$user" "$ip"
     fi
 done
+echo -e "${CYAN}---------------------------------------------${NC}\n"
 
-# === SSH ===
+
+# --- Menampilkan Pengguna OpenSSH (sshd) ---
 echo -e "${CYAN}---------------------------------------------${NC}"
-echo "       ID     |  Username    |  IP Address"
+echo -e "       ${ORANGE}OPENSSH LOGIN${NC}"
+echo -e "${CYAN}---------------------------------------------${NC}"
+printf "%-10s | %-15s | %-15s\n" "ID" "Username" "IP Address"
 echo -e "${CYAN}---------------------------------------------${NC}"
 
-data=( $(ps -eo pid,comm | grep sshd | grep -v grep | awk '{print $1}') )
-grep "Accepted password for" "$LOG" > /tmp/login-ssh.txt
-
-for PID in "${data[@]}"; do
-    grep "sshd\[$PID\]" /tmp/login-ssh.txt > /tmp/login-ssh-pid.txt
-    if [ -s /tmp/login-ssh-pid.txt ]; then
-        USER=$(awk '{print $9}' /tmp/login-ssh-pid.txt)
-        IP=$(awk '{print $11}' /tmp/login-ssh-pid.txt)
-        echo "$PID - $USER - $IP"
+# Logika yang lebih andal: cari log sukses, lalu periksa apakah PID-nya masih berjalan.
+grep -i "sshd.*Accepted password" "$LOG_FILE" | while read -r line; do
+    # Ekstrak informasi dari baris log
+    pid=$(echo "$line" | grep -o 'sshd\[[0-9]*\]' | grep -o '[0-9]*')
+    user=$(echo "$line" | awk '{print $9}')
+    ip=$(echo "$line" | awk '{print $11}')
+    
+    # Periksa apakah proses dengan PID tersebut masih berjalan
+    if ps -p "$pid" > /dev/null 2>&1; then
+        printf "%-10s | %-15s | %-15s\n" "$pid" "$user" "$ip"
     fi
 done
+echo -e "${CYAN}---------------------------------------------${NC}\n"
 
-# === OPENVPN TCP ===
-for path in "/etc/openvpn/server/openvpn-tcp.log" "/var/log/openvpn-tcp.log"; do
-    if [ -f "$path" ]; then
-        echo -e "${CYAN}---------------------------------------------${NC}"
-        echo "    Username  |  IP Address  |  Connected"
-        echo -e "${CYAN}---------------------------------------------${NC}"
-        grep -w "^CLIENT_LIST" "$path" | cut -d ',' -f 2,3,8 | sed 's/,/      /g'
-    fi
-done
 
-# === OPENVPN UDP ===
-for path in "/etc/openvpn/server/openvpn-udp.log" "/var/log/openvpn-udp.log"; do
-    if [ -f "$path" ]; then
-        echo -e "${CYAN}---------------------------------------------${NC}"
-        echo "    Username  |  IP Address  |  Connected"
-        echo -e "${CYAN}---------------------------------------------${NC}"
-        grep -w "^CLIENT_LIST" "$path" | cut -d ',' -f 2,3,8 | sed 's/,/      /g'
-    fi
-done
+# --- Menampilkan Pengguna OpenVPN (TCP) ---
+OVPN_TCP_LOG="/etc/openvpn/server/openvpn-tcp.log"
+if [ -f "$OVPN_TCP_LOG" ]; then
+    echo -e "${CYAN}---------------------------------------------${NC}"
+    echo -e "       ${ORANGE}OPENVPN TCP LOGIN${NC}"
+    echo -e "${CYAN}---------------------------------------------${NC}"
+    printf "%-15s | %-15s | %s\n" "Username" "IP Address" "Connected Since"
+    echo -e "${CYAN}---------------------------------------------${NC}"
+    
+    # Menghilangkan file sementara, langsung tampilkan output
+    grep -w "^CLIENT_LIST" "$OVPN_TCP_LOG" | cut -d ',' -f 2,3,8 | while IFS=, read -r user ip connected; do
+        printf "%-15s | %-15s | %s\n" "$user" "$ip" "$connected"
+    done
+    echo -e "${CYAN}---------------------------------------------${NC}\n"
+fi
 
-echo -e "${CYAN}---------------------------------------------${NC}"
-echo "";
-echo ""
-read -n 1 -s -r -p "Press any key to back on menu"
-m-ssh
+
+# --- Menampilkan Pengguna OpenVPN (UDP) ---
+OVPN_UDP_LOG="/etc/openvpn/server/openvpn-udp.log"
+if [ -f "$OVPN_UDP_LOG" ]; then
+    echo -e "${CYAN}---------------------------------------------${NC}"
+    echo -e "       ${ORANGE}OPENVPN UDP LOGIN${NC}"
+    echo -e "${CYAN}---------------------------------------------${NC}"
+    printf "%-15s | %-15s | %s\n" "Username" "IP Address" "Connected Since"
+    echo -e "${CYAN}---------------------------------------------${NC}"
+
+    # Sama seperti TCP, langsung tampilkan output
+    grep -w "^CLIENT_LIST" "$OVPN_UDP_LOG" | cut -d ',' -f 2,3,8 | while IFS=, read -r user ip connected; do
+        printf "%-15s | %-15s | %s\n" "$user" "$ip" "$connected"
+    done
+    echo -e "${CYAN}---------------------------------------------${NC}\n"
+fi
+
+# --- Bagian Akhir ---
+read -n 1 -s -r -p "Tekan tombol apa saja untuk kembali ke menu..."
+m-ssh # Diasumsikan 'm-ssh' adalah perintah/skrip lain yang valid di sistem Anda
