@@ -1,78 +1,109 @@
 #!/bin/bash
+# Script untuk memeriksa pengguna aktif SSH dan OpenVPN
+# Versi yang disempurnakan: lebih efisien, andal, dan rapi
+
+# --- Warna dan Inisialisasi ---
 clear
-# Color
 RED='\033[0;31m'
 NC='\033[0m'
 GREEN='\033[0;32m'
-ORANGE='\033[0;33m'
-BLUE='\033[0;34m'
-PURPLE='\033[0;35m'
 CYAN='\033[0;36m'
-LIGHT='\033[0;37m'
 
-if [ -e "/var/log/auth.log" ]; then
-    LOG="/var/log/auth.log"
-elif [ -e "/var/log/secure" ]; then
-    LOG="/var/log/secure"
+# --- Deteksi File Log Otomatis ---
+# Mencari file log otentikasi yang benar secara otomatis dan lebih andal
+if [ -f "/var/log/auth.log" ]; then
+    LOG_FILE="/var/log/auth.log"
+elif [ -f "/var/log/secure" ]; then
+    LOG_FILE="/var/log/secure"
 else
-    echo "Log file tidak ditemukan."
+    echo -e "${RED}Error: Tidak dapat menemukan file log /var/log/auth.log atau /var/log/secure.${NC}"
     exit 1
 fi
 
-# DROPBEAR
-data=( $(ps aux | grep -i dropbear | awk '{print $2}') )
-echo -e "\033[1;36m---------------------------------------------\033[0m"
-echo "       ID     |  Username    |  IP Address"
-echo -e "\033[1;36m---------------------------------------------\033[0m"
-grep -i dropbear "$LOG" | grep -i "Password auth succeeded" > /tmp/login-db.txt
-for PID in "${data[@]}"; do
-    grep "dropbear\[$PID\]" /tmp/login-db.txt > /tmp/login-db-pid.txt
-    NUM=$(wc -l < /tmp/login-db-pid.txt)
-    if [ "$NUM" -eq 1 ]; then
-        USER=$(awk '{gsub("'\'","",$0); print $8}' /tmp/login-db-pid.txt)     # hapus tanda petik
-        IP=$(awk '{print $10}' /tmp/login-db-pid.txt | cut -d: -f1)          # ambil IP tanpa port
-        echo "$PID - $USER - $IP"
-    fi
-done
-echo -e "\033[1;36m---------------------------------------------\033[0m"
+# --- Fungsi untuk Header Tabel (agar tidak berulang) ---
+print_header() {
+    echo -e "${CYAN}-----------------------------------------------------${NC}"
+    echo -e "${CYAN} PID          | Username          | IP Address${NC}"
+    echo -e "${CYAN}-----------------------------------------------------${NC}"
+}
 
-# SSH
-echo " "
-echo -e "\033[1;36m---------------------------------------------\033[0m"
-echo "       ID     |  Username    |  IP Address"
-echo -e "\033[1;36m---------------------------------------------\033[0m"
-grep -i sshd "$LOG" | grep -i "Accepted password for" > /tmp/login-db.txt
-data=( $(ps aux | grep "\[priv\]" | sort -k 72 | awk '{print $2}') )
-for PID in "${data[@]}"; do
-    grep "sshd\[$PID\]" /tmp/login-db.txt > /tmp/login-db-pid.txt
-    NUM=$(wc -l < /tmp/login-db-pid.txt)
-    if [ "$NUM" -eq 1 ]; then
-        USER=$(awk '{print $9}' /tmp/login-db-pid.txt)
-        IP=$(awk '{print $11}' /tmp/login-db-pid.txt)
-        echo "$PID - $USER - $IP"
-    fi
-done
-echo -e "\033[1;36m---------------------------------------------\033[0m"
+print_vpn_header() {
+    echo -e "${CYAN}-----------------------------------------------------${NC}"
+    echo -e "${CYAN} Username          | IP Address        | Terhubung Sejak${NC}"
+    echo -e "${CYAN}-----------------------------------------------------${NC}"
+}
 
-# OPENVPN TCP
-if [ -f "/etc/openvpn/server/openvpn-tcp.log" ]; then
-    echo ""
-    echo -e "\033[1;36m---------------------------------------------\033[0m"
-    echo "    Username  |  IP Address  |  Connected"
-    echo -e "\033[1;36m---------------------------------------------\033[0m"
-    grep -w "^CLIENT_LIST" /etc/openvpn/server/openvpn-tcp.log | cut -d ',' -f 2,3,8 | sed -e 's/,/      /g'
-fi
-echo -e "\033[1;36m---------------------------------------------\033[0m"
-
-# OPENVPN UDP
-if [ -f "/etc/openvpn/server/openvpn-udp.log" ]; then
-    echo " "
-    echo -e "\033[1;36m---------------------------------------------\033[0m"
-    echo "    Username  |  IP Address  |  Connected"
-    echo -e "\033[1;36m---------------------------------------------\033[0m"
-    grep -w "^CLIENT_LIST" /etc/openvpn/server/openvpn-udp.log | cut -d ',' -f 2,3,8 | sed -e 's/,/      /g'
-fi
-echo -e "\033[1;36m---------------------------------------------\033[0m"
+# --- Pengguna Dropbear ---
 echo ""
-read -n 1 -s -r -p "Press any key to back on menu"
-m-ssh
+echo -e "${GREEN}=======[ DAFTAR PENGGUNA DROPBEAR ]========${NC}"
+print_header
+# Gunakan pgrep untuk keandalan dan proses di dalam satu loop
+# Menghindari file sementara dan jauh lebih cepat
+for PID in $(pgrep -f dropbear); do
+    # Cari info login yang sesuai dengan PID yang sedang berjalan
+    LOGIN_INFO=$(grep "Password auth succeeded" "$LOG_FILE" | grep "dropbear\[$PID\]")
+    
+    # Jika baris info login ditemukan
+    if [[ ! -z "$LOGIN_INFO" ]]; then
+        # Ambil username dan hapus tanda kutip (') di sekelilingnya
+        USER=$(echo "$LOGIN_INFO" | awk '{print $10}' | tr -d "'")
+        # Ambil IP dan hapus nomor port di belakangnya
+        IP=$(echo "$LOGIN_INFO" | awk '{print $12}' | cut -d: -f1)
+        
+        # Cetak dengan format tabel yang rapi
+        printf " %-12s | %-17s | %s\n" "$PID" "$USER" "$IP"
+    fi
+done
+echo -e "${CYAN}-----------------------------------------------------${NC}"
+
+
+# --- Pengguna OpenSSH (sshd) ---
+echo ""
+echo -e "${GREEN}========[ DAFTAR PENGGUNA OPENSSH ]=========${NC}"
+print_header
+# Logika yang sama seperti Dropbear: pgrep lebih baik dari ps aux | grep
+for PID in $(pgrep -f sshd); do
+    LOGIN_INFO=$(grep "Accepted password for" "$LOG_FILE" | grep "sshd\[$PID\]")
+    if [[ ! -z "$LOGIN_INFO" ]]; then
+        USER=$(echo "$LOGIN_INFO" | awk '{print $9}')
+        IP=$(echo "$LOGIN_INFO" | awk '{print $11}')
+        printf " %-12s | %-17s | %s\n" "$PID" "$USER" "$IP"
+    fi
+done
+echo -e "${CYAN}-----------------------------------------------------${NC}"
+
+
+# --- Pengguna OpenVPN (TCP) ---
+OVPN_TCP_LOG="/etc/openvpn/server/openvpn-tcp.log"
+if [ -f "$OVPN_TCP_LOG" ]; then
+    echo ""
+    echo -e "${GREEN}=======[ DAFTAR PENGGUNA OPENVPN TCP ]========${NC}"
+    print_vpn_header
+    # Proses file log secara langsung tanpa file sementara
+    grep "^CLIENT_LIST" "$OVPN_TCP_LOG" | while read -r line; do
+        # Gunakan awk untuk format kolom yang rapi
+        echo "$line" | awk -F',' '{printf " %-17s | %-17s | %s\n", $2, $3, $8}'
+    done
+    echo -e "${CYAN}-----------------------------------------------------${NC}"
+fi
+
+
+# --- Pengguna OpenVPN (UDP) ---
+OVPN_UDP_LOG="/etc/openvpn/server/openvpn-udp.log"
+if [ -f "$OVPN_UDP_LOG" ]; then
+    echo ""
+    echo -e "${GREEN}=======[ DAFTAR PENGGUNA OPENVPN UDP ]========${NC}"
+    print_vpn_header
+    # Pemrosesan efisien yang sama untuk UDP
+    grep "^CLIENT_LIST" "$OVPN_UDP_LOG" | while read -r line; do
+        echo "$line" | awk -F',' '{printf " %-17s | %-17s | %s\n", $2, $3, $8}'
+    done
+    echo -e "${CYAN}-----------------------------------------------------${NC}"
+fi
+
+
+# --- Footer ---
+echo ""
+echo ""
+read -n 1 -s -r -p "Tekan tombol apa saja untuk kembali ke menu..."
+m-ssh # Perintah ini memanggil skrip menu Anda
