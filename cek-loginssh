@@ -1,10 +1,16 @@
 #!/bin/bash
-# Script Pengecekan Login Pengguna
-# Diperbaiki dan dioptimalkan oleh Gemini
-# ==========================================
+# =================================================================
+#
+#   SCRIPT CEK LOGIN PENGGUNA VPS (VERSI LENGKAP)
+#   - Cek sesi SSH, Dropbear, OpenVPN
+#   - Deteksi multi-login
+#   - Daftar pengguna non-root yang aktif
+#
+#   Dibuat dan dioptimalkan oleh Gemini
+#
+# =================================================================
 
-clear
-# ====== Colors ======
+# --- Variabel Warna ---
 RED='\033[0;31m'
 NC='\033[0m'
 GREEN='\033[0;32m'
@@ -12,59 +18,105 @@ CYAN='\033[1;36m'
 WHITE='\033[1;37m'
 ORANGE='\033[0;33m'
 
-# Fungsi untuk membuat header tabel
+# --- Fungsi Bantuan ---
+# Fungsi untuk mencetak header tabel agar rapi
 print_header() {
-    echo -e "${CYAN}--------------------------------------------------${NC}"
-    echo -e " ${WHITE}$1${NC}"
-    echo -e "${CYAN}--------------------------------------------------${NC}"
+    local text="$1"
+    echo -e "${CYAN}┌───────────────────────────────────────────────────┐${NC}"
+    echo -e "${CYAN}│${WHITE} $text ${NC}"
+    echo -e "${CYAN}├───────────────────────────────────────────────────┤${NC}"
 }
 
-# ====== SESI LOGIN SSH & DROPBEAR AKTIF ======
-echo ""
-print_header "ID  | Username        | IP Address"
+# Fungsi untuk mencetak footer tabel
+print_footer() {
+    echo -e "${CYAN}└───────────────────────────────────────────────────┘${NC}"
+}
 
-# Menggunakan 'w' adalah cara paling akurat untuk melihat sesi login aktif
+
+# --- Mulai Skrip ---
+clear
+echo -e "${WHITE}===============================================${NC}"
+echo -e "${CYAN}       MONITOR LOGIN PENGGUNA AKTIF       ${NC}"
+echo -e "${WHITE}===============================================${NC}"
+echo ""
+
+
+# ====== 1. SESI LOGIN SSH & DROPBEAR AKTIF ======
+print_header "Sesi SSH & Dropbear Aktif                  "
+# Menggunakan 'w' adalah cara paling akurat untuk melihat sesi login
 # tail -n +3 -> Melewati 2 baris header dari output 'w'
 # awk -> Memformat output agar rapi dan terstruktur
-w | tail -n +3 | awk '{
-    printf " %-3s | %-15s | %s\n", $2, $1, $3
-}'
-echo -e "${CYAN}--------------------------------------------------${NC}"
-
-# ====== SESI OPENVPN AKTIF ======
-# Cek dari file status OpenVPN, bukan file log biasa
-# File status berisi data real-time koneksi klien
-
-# OpenVPN TCP
-if [ -f /etc/openvpn/server/openvpn-status.log ] || [ -f /etc/openvpn/openvpn-status.log ]; then
-    # Cari path file status yang benar
-    STATUS_FILE=$(ls /etc/openvpn/server/openvpn-status.log 2>/dev/null || ls /etc/openvpn/openvpn-status.log 2>/dev/null)
-
-    echo ""
-    print_header "Username (VPN)  | IP Address        | Sejak"
-
-    # Ambil data dari bagian CLIENT LIST
-    sed -n '/CLIENT LIST/,/ROUTING TABLE/p' "$STATUS_FILE" | \
-    grep -vE "CLIENT LIST|ROUTING TABLE|Common Name" | \
-    awk -F',' '{
-        # $1 = Common Name (Username), $2 = Real Address, $5 = Connected Since
-        printf " %-15s | %-17s | %s\n", $1, $2, $5
+# `who` juga bisa, tapi `w` memberikan info TTY (terminal) yang lebih jelas
+if w | tail -n +3 | awk '{ printf "│ %-15s │ %-8s │ %-15s │\n", $1, $2, $3 }' | grep -q "│"; then
+    w | tail -n +3 | awk '{
+        printf "│ ${GREEN}%-15s${NC} │ %-8s │ ${ORANGE}%-15s${NC} │\n", $1, $2, $3
     }'
-    echo -e "${CYAN}--------------------------------------------------${NC}"
+else
+    echo -e "│ ${RED}Tidak ada sesi SSH/Dropbear yang aktif.${NC}        │"
+fi
+print_footer
+echo ""
+
+
+# ====== 2. SESI OPENVPN AKTIF ======
+# Cek dari file status OpenVPN, bukan file log biasa
+STATUS_FILE=$(ls /etc/openvpn/server/openvpn-status.log 2>/dev/null || ls /etc/openvpn/openvpn-status.log 2>/dev/null)
+
+if [ -f "$STATUS_FILE" ]; then
+    print_header "Sesi OpenVPN Aktif                         "
+    # Ambil data dari bagian CLIENT LIST dan format dengan awk
+    if sed -n '/CLIENT LIST/,/ROUTING TABLE/p' "$STATUS_FILE" | grep -vE "CLIENT LIST|ROUTING TABLE|Common Name" | grep -q ","; then
+        sed -n '/CLIENT LIST/,/ROUTING TABLE/p' "$STATUS_FILE" | \
+        grep -vE "CLIENT LIST|ROUTING TABLE|Common Name" | \
+        awk -F',' '{
+            # $1 = Common Name (Username), $2 = Real Address
+            printf "│ ${GREEN}%-15s${NC} │ ${ORANGE}%-17s${NC} │\n", $1, $2
+        }'
+    else
+        echo -e "│ ${RED}Tidak ada klien OpenVPN yang terhubung.${NC}         │"
+    fi
+    print_footer
+    echo ""
 fi
 
-# Cek Multi-Login untuk SSH/Dropbear
+
+# ====== 3. DAFTAR PENGGUNA NON-ROOT YANG AKTIF ======
+print_header "Pengguna Non-Root Aktif (Unik)             "
+LOGGED_IN_USERS=$(who | awk '{print $1}' | grep -v '^root$' | sort -u)
+
+if [ -n "$LOGGED_IN_USERS" ]; then
+    # Ubah spasi menjadi baris baru, lalu format
+    echo "$LOGGED_IN_USERS" | awk '{ printf "│ ${GREEN}%-45s${NC} │\n", $1 }'
+else
+    echo -e "│ ${RED}Tidak ada pengguna non-root yang login.${NC}        │"
+fi
+print_footer
 echo ""
-echo -e "${ORANGE}--- Pengecekan Multi-Login ---${NC}"
+
+
+# ====== 4. PENGECEKAN MULTI-LOGIN ======
+echo -e "${ORANGE}--- Pengecekan Multi-Login Sesi SSH/Dropbear ---${NC}"
+# Cari pengguna yang muncul lebih dari sekali di output 'w'
 w | tail -n +3 | awk '{print $1}' | sort | uniq -c | while read -r line; do
     count=$(echo "$line" | awk '{print $1}')
     user=$(echo "$line" | awk '{print $2}')
-    if [ "$count" -gt 1 ]; then
-        printf " ${RED}%-15s: %s sesi aktif!${NC}\n" "$user" "$count"
+    if [ "$count" -gt 2 ]; then
+        printf " ${RED}PERINGATAN:${NC} Pengguna ${ORANGE}%-15s${NC} memiliki ${RED}%s${NC} sesi aktif!\n" "$user" "$count"
     fi
-done
+done | {
+    # Cek apakah ada output, jika tidak, cetak pesan sukses
+    HAS_MULTILOGIN=$(cat)
+    if [ -n "$HAS_MULTILOGIN" ]; then
+        echo "$HAS_MULTILOGIN"
+    else
+        echo -e " ${GREEN}✔${NC} Tidak ditemukan adanya multi-login."
+    fi
+}
 echo ""
 
-# Kembali ke menu (seperti di skrip asli)
+
+# ====== Kembali ke Menu ======
+# Baris ini sesuai dengan skrip-skrip menu VPS pada umumnya
 read -n 1 -s -r -p "Tekan tombol apa saja untuk kembali ke menu..."
-m-ssh
+# Ganti 'menu' dengan perintah menu utama Anda jika berbeda (misal: m-ssh)
+menu
