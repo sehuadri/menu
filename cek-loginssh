@@ -1,84 +1,70 @@
 #!/bin/bash
+# Script Pengecekan Login Pengguna
+# Diperbaiki dan dioptimalkan oleh Gemini
+# ==========================================
+
 clear
 # ====== Colors ======
 RED='\033[0;31m'
 NC='\033[0m'
 GREEN='\033[0;32m'
 CYAN='\033[1;36m'
-WHITE="\033[1;37m"
+WHITE='\033[1;37m'
+ORANGE='\033[0;33m'
 
-echo ""
-echo ""
+# Fungsi untuk membuat header tabel
+print_header() {
+    echo -e "${CYAN}--------------------------------------------------${NC}"
+    echo -e " ${WHITE}$1${NC}"
+    echo -e "${CYAN}--------------------------------------------------${NC}"
+}
 
-# ====== Cek log file ======
-if [ -e "/var/log/auth.log" ]; then
-    LOG="/var/log/auth.log"
-elif [ -e "/var/log/secure" ]; then
-    LOG="/var/log/secure"
-else
-    echo -e "${RED}File log tidak ditemukan!${NC}"
-    exit 1
+# ====== SESI LOGIN SSH & DROPBEAR AKTIF ======
+echo ""
+print_header "ID  | Username        | IP Address"
+
+# Menggunakan 'w' adalah cara paling akurat untuk melihat sesi login aktif
+# tail -n +3 -> Melewati 2 baris header dari output 'w'
+# awk -> Memformat output agar rapi dan terstruktur
+w | tail -n +3 | awk '{
+    printf " %-3s | %-15s | %s\n", $2, $1, $3
+}'
+echo -e "${CYAN}--------------------------------------------------${NC}"
+
+# ====== SESI OPENVPN AKTIF ======
+# Cek dari file status OpenVPN, bukan file log biasa
+# File status berisi data real-time koneksi klien
+
+# OpenVPN TCP
+if [ -f /etc/openvpn/server/openvpn-status.log ] || [ -f /etc/openvpn/openvpn-status.log ]; then
+    # Cari path file status yang benar
+    STATUS_FILE=$(ls /etc/openvpn/server/openvpn-status.log 2>/dev/null || ls /etc/openvpn/openvpn-status.log 2>/dev/null)
+
+    echo ""
+    print_header "Username (VPN)  | IP Address        | Sejak"
+
+    # Ambil data dari bagian CLIENT LIST
+    sed -n '/CLIENT LIST/,/ROUTING TABLE/p' "$STATUS_FILE" | \
+    grep -vE "CLIENT LIST|ROUTING TABLE|Common Name" | \
+    awk -F',' '{
+        # $1 = Common Name (Username), $2 = Real Address, $5 = Connected Since
+        printf " %-15s | %-17s | %s\n", $1, $2, $5
+    }'
+    echo -e "${CYAN}--------------------------------------------------${NC}"
 fi
 
-# ====== DROPBEAR LOGIN ======
-data=( $(ps aux | grep -i '[d]ropbear' | awk '{print $2}') )
-echo -e "${CYAN}---------------------------------------------${NC}"
-echo -e "   ${WHITE}ID   |  Username     |  IP Address${NC}"
-echo -e "${CYAN}---------------------------------------------${NC}"
-
-grep -i dropbear "$LOG" | grep -i "Password auth succeeded" > /tmp/login-db.txt
-
-for PID in "${data[@]}"; do
-    grep "dropbear\[$PID\]" /tmp/login-db.txt > /tmp/login-db-pid.txt
-    NUM=$(wc -l < /tmp/login-db-pid.txt)
-    USER=$(awk -F"for " '{print $2}' /tmp/login-db-pid.txt | awk '{print $1}' | head -n1)
-    IP=$(awk -F"for " '{print $2}' /tmp/login-db-pid.txt | awk '{print $3}' | head -n1)
-    if [ "$NUM" -ge 1 ]; then
-        echo "$PID - $USER - $IP"
+# Cek Multi-Login untuk SSH/Dropbear
+echo ""
+echo -e "${ORANGE}--- Pengecekan Multi-Login ---${NC}"
+w | tail -n +3 | awk '{print $1}' | sort | uniq -c | while read -r line; do
+    count=$(echo "$line" | awk '{print $1}')
+    user=$(echo "$line" | awk '{print $2}')
+    if [ "$count" -gt 1 ]; then
+        printf " ${RED}%-15s: %s sesi aktif!${NC}\n" "$user" "$count"
     fi
 done
-echo -e "${CYAN}---------------------------------------------${NC}"
 echo ""
 
-# ====== SSH LOGIN ======
-echo -e "${CYAN}---------------------------------------------${NC}"
-echo -e "   ${WHITE}ID   |  Username     |  IP Address${NC}"
-echo -e "${CYAN}---------------------------------------------${NC}"
-
-grep -i sshd "$LOG" | grep -i "Accepted password for" > /tmp/login-ssh.txt
-data=( $(ps -o pid,cmd -C sshd | grep "\[priv\]" | awk '{print $1}') )
-
-for PID in "${data[@]}"; do
-    grep "sshd\[$PID\]" /tmp/login-ssh.txt > /tmp/login-ssh-pid.txt
-    NUM=$(wc -l < /tmp/login-ssh-pid.txt)
-    USER=$(awk -F"for " '{print $2}' /tmp/login-ssh-pid.txt | awk '{print $1}' | head -n1)
-    IP=$(awk -F"for " '{print $2}' /tmp/login-ssh-pid.txt | awk '{print $3}' | head -n1)
-    if [ "$NUM" -ge 1 ]; then
-        echo "$PID - $USER - $IP"
-    fi
-done
-echo -e "${CYAN}---------------------------------------------${NC}"
-
-# ====== OPENVPN TCP ======
-if [ -f "/etc/openvpn/server/openvpn-tcp.log" ]; then
-    echo ""
-    echo -e "${CYAN}---------------------------------------------${NC}"
-    echo -e "   ${WHITE}Username   |  IP Address     | Connected${NC}"
-    echo -e "${CYAN}---------------------------------------------${NC}"
-    grep -w "^CLIENT_LIST" /etc/openvpn/server/openvpn-tcp.log | cut -d ',' -f 2,3,8 | sed -e 's/,/      /g'
-    echo -e "${CYAN}---------------------------------------------${NC}"
-fi
-
-# ====== OPENVPN UDP ======
-if [ -f "/etc/openvpn/server/openvpn-udp.log" ]; then
-    echo ""
-    echo -e "${CYAN}---------------------------------------------${NC}"
-    echo -e "   ${WHITE}Username   |  IP Address     | Connected${NC}"
-    echo -e "${CYAN}---------------------------------------------${NC}"
-    grep -w "^CLIENT_LIST" /etc/openvpn/server/openvpn-udp.log | cut -d ',' -f 2,3,8 | sed -e 's/,/      /g'
-    echo -e "${CYAN}---------------------------------------------${NC}"
-fi
-
-echo ""
-read -n 1 -s -r -p "Press any key to back on menu"
+# Kembali ke menu (seperti di skrip asli)
+read -n 1 -s -r -p "Tekan tombol apa saja untuk kembali ke menu..."
 m-ssh
