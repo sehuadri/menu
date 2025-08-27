@@ -96,11 +96,12 @@ echo ""
 read -p "Select menu :" opt
 echo -e ""
 case $opt in
-1) clear ; bot-give ;;
-2) clear ; restart-give ;;
-3) clear ; stop-give ;;
-4) clear ; del-give ;;
+1) clear ; bot-giv ;;
+2) clear ; restart-giv ;;
+3) clear ; stop-giv ;;
+4) clear ; del-giv ;;
 0) clear ; m-bot ; exit ;;
 x) clear ; menu ;;
 *) echo "anda salah tekan" ; sleep 1 ; m-give ;;
+
 esac
